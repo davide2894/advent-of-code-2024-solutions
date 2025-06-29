@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+*.log
+.env
+.vscode/settings.json
+
+# Keep example inputs but ignore actual puzzle inputs for privacy
+# Uncomment the line below if you want to keep your inputs private
+# **/input.txt
