@@ -9,7 +9,11 @@
     "dev": "node --watch runner.js",
     "new": "node scripts/new-day.js"
   },
-  "keywords": ["advent-of-code", "javascript", "algorithms"],
+  "keywords": [
+    "advent-of-code",
+    "javascript",
+    "algorithms"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {},
