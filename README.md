@@ -38,11 +38,9 @@ npm run new -- 2024 1
 │       ├── day01/
 │       │   ├── index.js
 │       │   ├── input.txt
-│       │   └── example.txt
 │       └── day02/
 │           ├── index.js
 │           ├── input.txt
-│           └── example.txt
 ├── utils/
 │   └── index.js
 └── runner.js
@@ -60,6 +58,5 @@ The `utils` module provides common functions for AoC problems:
 ## Tips
 
 1. Put your puzzle input in `input.txt`
-2. Put the example from the problem in `example.txt`
-3. Use the utilities for common operations
-4. Each day exports `part1` and `part2` functions
+2. Use the utilities for common operations
+3. Each day exports `part1` and `part2` functions

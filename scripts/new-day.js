@@ -39,7 +39,6 @@ function createNewDay(year, day) {
   // Create files
   const indexPath = path.join(dayPath, "index.js");
   const inputPath = path.join(dayPath, "input.txt");
-  const examplePath = path.join(dayPath, "example.txt");
 
   if (!fs.existsSync(indexPath)) {
     fs.writeFileSync(indexPath, TEMPLATE);
@@ -55,20 +54,12 @@ function createNewDay(year, day) {
     console.log(`⚠️  ${inputPath} already exists`);
   }
 
-  if (!fs.existsSync(examplePath)) {
-    fs.writeFileSync(examplePath, "");
-    console.log(`✅ Created ${examplePath}`);
-  } else {
-    console.log(`⚠️  ${examplePath} already exists`);
-  }
-
   console.log(`\n🎄 Ready to solve ${year} Day ${day}!`);
   console.log(`📁 Files created in: ${dayPath}`);
   console.log(`\nNext steps:`);
   console.log(`1. Copy your puzzle input to ${inputPath}`);
-  console.log(`2. Copy the example input to ${examplePath}`);
-  console.log(`3. Implement your solution in ${indexPath}`);
-  console.log(`4. Run with: npm start -- ${year} ${day}`);
+  console.log(`2. Implement your solution in ${indexPath}`);
+  console.log(`3. Run with: npm start -- ${year} ${day}`);
 }
 
 // Parse command line arguments
