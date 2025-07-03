@@ -32,6 +32,11 @@ function findVerticalXmasCount(lines, isInverted = false) {
   if (isInverted) {
     let lineIndexToUse = 0;
     for (let lineNumber = lines.length - 1; lineNumber >= 0; lineNumber--) {
+      //note: print line char corresponding in increasing order
+      //es. start from bottom line and go up
+      //    first get all chars at index 0 of each line
+      //    then get all chars at index 1 of each line
+      //    and so on until the end of the lin
       console.log("proceessing line number:", lineNumber);
       console.log("line[lineIndexToUse]:", lines[lineNumber][lineIndexToUse]);
       const bottomUpLine = lines.map((line) => line[lineIndexToUse]).join("");
