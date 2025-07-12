@@ -2,18 +2,21 @@ import { match } from "assert";
 import { readInput, readLines } from "../../../utils/index.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import { Socket } from "dgram";
+import { get } from "http";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export function part1() {
   const lines = readLines(path.join(__dirname, "input.txt"));
-  const horizontalXmasCount = findXmasCount(lines);
-  const verticalXmasCount = findVerticalXmasCount(lines);
-
-  return horizontalXmasCount + verticalXmasCount;
+  return (
+    getHorizontalXmasCount(lines) +
+    getVerticalXmasCount(lines) +
+    getDiagonalXmasCount(lines)
+  );
 }
 
-function findXmasCount(lines) {
+function getHorizontalXmasCount(lines) {
   let xmasCount = 0;
   for (const line of lines) {
     const pattern = /XMAS/gi;
@@ -25,35 +28,95 @@ function findXmasCount(lines) {
   return xmasCount;
 }
 
-function findVerticalXmasCount(lines, isInverted = false) {
-  let verticalLines = "";
-
-  // if (isInverted) {
-  //   let lineIndexToUse = 0;
-  //   for (let lineNumber = lines.length - 1; lineNumber >= 0; lineNumber--) {
-  //     // note: print line char corresponding in increasing order
-  //     //       es. start from bottom line and go up
-  //     //       first get all chars at index 0 of each line
-  //     //       then get all chars at index 1 of each line
-  //     //       and so on until the end of the line
-  //     //       right now i'm iterating only on the lines
-  //     console.log("lineNumber:", lineNumber);
-  //     console.log("line[lineIndexToUse]:", lines[lineNumber][lineIndexToUse]);
-  //     const bottomUpLine = lines.map((line) => line[lineIndexToUse]).join("");
-  //     verticalLines += bottomUpLine;
-  //     lineIndexToUse++;
-  //   }
-  // } else {
-  // }
-
+function getVerticalXmasCount(lines) {
+  let count = 0;
   for (let i = 0; i < lines.length; i++) {
     const topDownLine = lines.map((line) => line[i]).join("");
-    verticalLines += topDownLine;
+    count += topDownLine.match(/XMAS/gi)?.length || 0;
+    count += topDownLine.match(/SAMX/gi)?.length || 0;
+  }
+  return count;
+}
+
+function getDiagonalXmasCount(matrix) {
+  const leftToRightDiagonals = getLeftToRightDiagonals(matrix);
+  const rightToLeftDiagonals = getLeftToRightDiagonals(matrix.map(row => row.split("").reverse().join("")));
+
+  return leftToRightDiagonals + rightToLeftDiagonals;
+}
+
+function getLeftToRightDiagonals(matrix){
+  let n = matrix.length;
+  let m = matrix[0].length;
+  let count = 0;
+  
+  // Process all diagonals starting from the first column
+  // console.log("Process all diagonals starting from the first column")
+  for (let row = 0; row < n; row++) {
+    let i = row, j = 0;
+    let res = [];
+    // console.log("row:", row);
+    // console.log("i:", i);
+    // console.log("j:", j);
+
+    // Follow each diagonal going up and right
+    // console.log("checking if I can enter the while loop");
+    // console.log("n:", n);
+    // console.log("m:", m); 
+    // console.log("i", i);
+    // console.log("j", j);
+    // console.log("i >= 0:", i >= 0);
+    // console.log("j < m:", j < m); 
+    while (i >= 0 && j < m) {
+      // console.log("inside while loop");
+      // console.log("i:", i);
+      // console.log("j:", j);
+      // console.log("mat[i][j]:", matrix[i][j]);
+      // console.log("while loop current iteration result:", res);
+      res.push(matrix[i][j]);
+      
+      i--;
+      j++;
+      // console.log("i after decrement:", i);
+      // console.log("j after increment:", j);
+    }
+    count += res.length >= 4 && res.join("").match(/XMAS/gi)?.length || 0;
+    count += res.length >= 4 && res.join("").match(/SAMX/gi)?.length || 0;
+  }
+  
+  // Process remaining diagonals starting from 
+  // the bottom row (except first column)
+  // console.log("Process remaining diagonals starting from the bottom row (except first column)");
+  for (let col = 1; col < m; col++) {
+    let i = n - 1, j = col;
+    let res = [];
+    // console.log("n:", n);
+    // console.log("m:", m);
+    // console.log("col:", col);
+    // console.log("i:", i);
+    
+    // Follow each diagonal going up and right
+    while (i >= 0 && j < m) {
+      // console.log("inside second while loop");
+      // console.log("i:", i);
+      // console.log("j:", j);
+      // console.log("i>= 0:", i >= 0);
+      // console.log("j < m:", j < m);
+      // console.log("i < m && j >= 0:", i < m && j >= 0); 
+      // console.log("mat[i][j]:", matrix[i][j]);
+      // console.log("while loop current iteration result:", res);
+      res.push(matrix[i][j]);
+      
+      i--;
+      j++;
+      // console.log("i after decrement:", i);
+      // console.log("j after increment:", j);
+    }
+    count += res.length >= 4 && res.join("").match(/XMAS/gi)?.length || 0;
+    count += res.length >= 4 && res.join("").match(/SAMX/gi)?.length || 0;
   }
 
-  const topDownLinesCount = verticalLines.match(/XMAS/gi).length || 0;
-  const bottomUpLinesCount = verticalLines.match(/SAMX/gi).length || 0;
-  return topDownLinesCount + bottomUpLinesCount;
+  return count;
 }
 
 export function part2() {
