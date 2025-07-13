@@ -121,5 +121,50 @@ function getLeftToRightDiagonals(matrix){
 
 export function part2() {
   const lines = readLines(path.join(__dirname, "input.txt"));
-  return "TODO";
+  console.log("lines:", lines);
+  let count = 0;
+  for(let row = 0; row < lines.length; row++) {
+    for(let col = 0; col < lines[row].length; col++) {
+      if(lines[row][col] === "A"){
+        if(row >= 1 && row !== lines.length -1 && col >=1 && col !== lines[row].length - 1) {
+          const corners = {
+            topLeft: lines[row-1][col-1],
+            topRight: lines[row-1][col+1],
+            bottomLeft: lines[row+1][col-1],
+            bottomRight: lines[row+1][col+1]
+          };
+          // Check if there is an X-MAS
+          if(
+             (
+              corners.topLeft === "M" && 
+              corners.topRight === "S" && 
+              corners.bottomLeft === "M" && 
+              corners.bottomRight === "S"
+             ) || 
+             (
+              corners.topLeft === "M" && 
+              corners.topRight === "M" && 
+              corners.bottomLeft === "S" && 
+              corners.bottomRight === "S") 
+              || 
+             (
+              corners.topLeft === "S" && 
+              corners.topRight === "S" && 
+              corners.bottomLeft === "M" && 
+              corners.bottomRight === "M") 
+              || 
+            (
+              corners.topLeft === "S" && 
+              corners.topRight === "M" && 
+              corners.bottomLeft === "S" && 
+              corners.bottomRight === "M"
+            )
+          ){
+            count++;
+          }
+        }
+      }
+    }
+  }
+  return count;
 }
