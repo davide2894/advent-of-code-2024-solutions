@@ -176,8 +176,8 @@ export function part1() {
   return count;
 }
 
-// export function part2() {
-//     const lines = readLines(path.join(__dirname, 'input.txt'));
-//     console.log('lines', lines);
-//     return 'TODO';
-// }
+export function part2() {
+  const lines = readLines(path.join(__dirname, "input.txt"));
+  console.log("lines", lines);
+  return "TODO";
+}
