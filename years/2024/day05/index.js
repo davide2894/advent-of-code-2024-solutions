@@ -1,31 +1,24 @@
-import { read } from "fs";
-import { readInput, readLines } from "../../../utils/index.js";
+import { readLines } from "../../../utils/index.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const lines = readLines(path.join(__dirname, "input.txt"));
+const rules = lines.slice(0, lines.indexOf(""));
+const updates = lines.slice(lines.indexOf("") + 1);
+const formattedUpdates = updates.map((update) =>
+  update.split(",").map((el) => parseInt(el, 10))
+);
 
 export function part1() {
-  const lines = readLines(path.join(__dirname, "input.txt"));
-  console.log(lines.indexOf(""));
-  const rules = lines.slice(0, lines.indexOf(""));
-  const updates = lines.slice(lines.indexOf("") + 1);
-  console.log("updates", updates);
-  const formattedUpdates = updates.map((update) =>
-    update.split(",").map((el) => parseInt(el, 10))
-  );
-  console.log("formattedUpdates", formattedUpdates);
   const middleNumbers = [];
-
   const validUpdates = formattedUpdates.filter((update) =>
     isValidUpdate(update, rules)
   );
-  console.log("validUpdates", validUpdates);
   validUpdates.forEach((update) => {
     const middleNumber = getArrayElementInTheMiddle(update);
     middleNumbers.push(middleNumber);
   });
-  console.log("middleNumbers", middleNumbers);
   const result = middleNumbers.reduce((acc, num) => {
     return acc + num;
   }, 0);
@@ -34,8 +27,6 @@ export function part1() {
 }
 
 function isValidUpdate(update, rules) {
-  console.log("Validating update:", update);
-  console.log("rules", rules);
   for (const rule of rules) {
     const [before, after] = rule.split("|");
     const beforeIndex = update.indexOf(parseInt(before, 10));
@@ -51,7 +42,6 @@ function isValidUpdate(update, rules) {
     }
   }
   return true;
-  // TODO: Implement validation logic
 }
 
 function getArrayElementInTheMiddle(arr) {
@@ -59,7 +49,44 @@ function getArrayElementInTheMiddle(arr) {
 }
 
 export function part2() {
-  //   const lines = readLines(path.join(__dirname, "input.txt"));
-  //   console.log("lines", lines);
-  return "TODO";
+  function getInvalidUpdates(updates, rules) {
+    return updates.filter((update) => !isValidUpdate(update, rules));
+  }
+  const middleNumbers = [];
+  const invalidUpdates = getInvalidUpdates(formattedUpdates, rules);
+  const correctedUpdates = invalidUpdates.map((update) => {
+    let allRulesAreValid = false;
+    while (!allRulesAreValid) {
+      for (const rule of rules) {
+        const [before, after] = rule.split("|");
+        const beforeIndex = update.indexOf(parseInt(before, 10));
+        if (beforeIndex === -1) {
+          continue;
+        }
+        const afterIndex = update.indexOf(parseInt(after, 10));
+        if (afterIndex === -1) {
+          continue;
+        }
+        if (beforeIndex > afterIndex) {
+          const temp = update[beforeIndex];
+          update[beforeIndex] = update[afterIndex];
+          update[afterIndex] = temp;
+        }
+      }
+      if (isValidUpdate(update, rules)) {
+        allRulesAreValid = true;
+        break;
+      }
+    }
+    return update;
+  });
+
+  correctedUpdates.forEach((update) => {
+    const middleNumber = getArrayElementInTheMiddle(update);
+    middleNumbers.push(middleNumber);
+  });
+
+  return middleNumbers.reduce((acc, num) => {
+    return acc + num;
+  }, 0);
 }
