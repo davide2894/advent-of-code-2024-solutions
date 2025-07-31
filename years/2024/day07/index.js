@@ -5,9 +5,8 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export function part1() {
-  function matchingEquations(numbers, target) {
+  function hasMatchingEquations(numbers, target) {
     const combinations = Math.pow(2, numbers.length - 1);
-    let matches = 0;
     for (let i = 0; i < combinations; i++) {
       const operationSequence = i.toString(2).padStart(numbers.length - 1, 0);
       let k = 0;
@@ -22,10 +21,10 @@ export function part1() {
         return operationResult;
       });
       if (reduceResult == target) {
-        matches++;
+        return true;
       }
     }
-    return matches;
+    return false;
   }
 
   const lines = readLines(path.join(__dirname, "input.txt"));
@@ -36,19 +35,14 @@ export function part1() {
       .split(":")
       .map((part) => part.trim(""));
     const formatttedNUmbers = numbers.split(" ").map((n) => parseInt(n));
-    console.log(
-      "matchingEquations",
-      matchingEquations(formatttedNUmbers, target)
-    );
-    if (matchingEquations(formatttedNUmbers, target)) {
-      finalSum += target;
+    if (hasMatchingEquations(formatttedNUmbers, target)) {
+      finalSum += parseInt(target);
     }
   }
   return finalSum;
 }
 
-// export function part2() {
-//   const lines = readLines(path.join(__dirname, "input.txt"));
-//   console.log("lines", lines);
-//   return "TODO";
-// }
+export function part2() {
+  const lines = readLines(path.join(__dirname, "input.txt"));
+  return "TODO";
+}
