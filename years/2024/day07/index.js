@@ -3,6 +3,21 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const lines = readLines(path.join(__dirname, "input.txt"));
+const mappedLines = getMappedLines(lines);
+
+function getMappedLines(lines) {
+  const parsedInput = [];
+  for (let i = 0; i < lines.length; i++) {
+    const currentLine = lines[i];
+    const [target, numbers] = currentLine
+      .split(":")
+      .map((part) => part.trim(""));
+    const formatttedNUmbers = numbers.split(" ").map((n) => parseInt(n));
+    parsedInput.push({ target: parseInt(target), formatttedNUmbers });
+  }
+  return parsedInput;
+}
 
 export function part1() {
   function hasMatchingEquations(numbers, target) {
@@ -11,6 +26,7 @@ export function part1() {
       const operationSequence = i.toString(2).padStart(numbers.length - 1, 0);
       let k = 0;
       let operationResult;
+
       const reduceResult = numbers.reduce((acc, curr) => {
         if (operationSequence[k] == 0) {
           operationResult = acc + curr;
@@ -20,21 +36,17 @@ export function part1() {
         k++;
         return operationResult;
       });
-      if (reduceResult == target) {
+      if (reduceResult === target) {
         return true;
       }
     }
     return false;
   }
 
-  const lines = readLines(path.join(__dirname, "input.txt"));
   let finalSum = 0;
-  for (let i = 0; i < lines.length; i++) {
-    const currentLine = lines[i];
-    const [target, numbers] = currentLine
-      .split(":")
-      .map((part) => part.trim(""));
-    const formatttedNUmbers = numbers.split(" ").map((n) => parseInt(n));
+
+  for (const line of mappedLines) {
+    const { target, formatttedNUmbers } = line;
     if (hasMatchingEquations(formatttedNUmbers, target)) {
       finalSum += parseInt(target);
     }
@@ -43,6 +55,5 @@ export function part1() {
 }
 
 export function part2() {
-  const lines = readLines(path.join(__dirname, "input.txt"));
   return "TODO";
 }
