@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const lines = readLines(path.join(__dirname, "input.txt"));
 const mappedLines = getMappedLines(lines);
+const baseOperators = ["+", "*", "||"];
 
 function getMappedLines(lines) {
   const parsedInput = [];
@@ -20,8 +21,8 @@ function getMappedLines(lines) {
 }
 
 export function part1() {
-  function hasMatchingEquations(numbers, target) {
-    const combinations = Math.pow(2, numbers.length - 1);
+  function hasMatchingEquations(numbers, target, base) {
+    const combinations = Math.pow(base, numbers.length - 1);
     for (let i = 0; i < combinations; i++) {
       const operationSequence = i.toString(2).padStart(numbers.length - 1, 0);
       let k = 0;
@@ -30,8 +31,10 @@ export function part1() {
       const reduceResult = numbers.reduce((acc, curr) => {
         if (operationSequence[k] == 0) {
           operationResult = acc + curr;
-        } else {
+        } else if (operationSequence[k] == 1) {
           operationResult = acc * curr;
+        } else if (operationSequence[k] == 2) {
+          operationResult = parseInt(acc.toString() + curr.toString());
         }
         k++;
         return operationResult;
@@ -47,7 +50,7 @@ export function part1() {
 
   for (const line of mappedLines) {
     const { target, formatttedNUmbers } = line;
-    if (hasMatchingEquations(formatttedNUmbers, target)) {
+    if (hasMatchingEquations(formatttedNUmbers, target, 2)) {
       finalSum += parseInt(target);
     }
   }
@@ -55,5 +58,11 @@ export function part1() {
 }
 
 export function part2() {
-  return "TODO";
+  for (const line of mappedLines) {
+    const { target, formatttedNUmbers } = line;
+    if (hasMatchingEquations(formatttedNUmbers, target, 3)) {
+      finalSum += parseInt(target);
+    }
+  }
+  return finalSum;
 }
