@@ -7,6 +7,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const lines = readLines(path.join(__dirname, "input.txt"));
+const arr = convertArrayOfStringsToArrayOfNumbers(lines);
 
 function getDirections(currentLine, currentCharIndex, prevLine, nextLine) {
   return {
@@ -22,11 +24,15 @@ function findTrailingPaths(
   currentLineIndex,
   currentCharIndex,
   currentCharValue,
-  uniquePaths = new Set()
+  uniquePaths
 ) {
   if (currentCharValue === 9) {
-    uniquePaths.add(`${currentLineIndex},${currentCharIndex}`);
-    return;
+    if (uniquePaths) {
+      uniquePaths.add(`${currentLineIndex},${currentCharIndex}`);
+      return;
+    } else {
+      return 1;
+    }
   }
   let pathsCount = 0;
   const currentLine = linesArray[currentLineIndex];
@@ -76,13 +82,11 @@ function findTrailingPaths(
     );
   }
 
-  return uniquePaths.size;
+  return uniquePaths ? uniquePaths.size : pathsCount;
 }
 
 export function part1() {
-  const lines = readLines(path.join(__dirname, "input.txt"));
   let trailingPathCount = 0;
-  const arr = convertArrayOfStringsToArrayOfNumbers(lines);
 
   // Loop through each line in the array
   for (
@@ -100,21 +104,48 @@ export function part1() {
       const currentCharValue = currentLine[currentCharIndex];
       const isTrailingHead = currentCharValue === 0;
       if (isTrailingHead) {
-        const trailingHeadScore = findTrailingPaths(
+        const trailingHeadCount = findTrailingPaths(
           arr,
           currentLineIndex,
           currentCharIndex,
-          currentCharValue
+          currentCharValue,
+          new Set()
         );
-        trailingPathCount += trailingHeadScore;
+        trailingPathCount += trailingHeadCount;
       }
     }
   }
   return trailingPathCount;
 }
 
-// export function part2() {
-//   const lines = readLines(path.join(__dirname, "input.txt"));
-//   console.log("lines", lines);
-//   return "TODO";
-// }
+export function part2() {
+  let trailingPathCount = 0;
+
+  // Loop through each line in the array
+  for (
+    let currentLineIndex = 0;
+    currentLineIndex < arr.length;
+    currentLineIndex++
+  ) {
+    const currentLine = arr[currentLineIndex];
+    // Loop through each character in the current line
+    for (
+      let currentCharIndex = 0;
+      currentCharIndex < currentLine.length;
+      currentCharIndex++
+    ) {
+      const currentCharValue = currentLine[currentCharIndex];
+      const isTrailingHead = currentCharValue === 0;
+      if (isTrailingHead) {
+        const trailingHeadCount = findTrailingPaths(
+          arr,
+          currentLineIndex,
+          currentCharIndex,
+          currentCharValue
+        );
+        trailingPathCount += trailingHeadCount;
+      }
+    }
+  }
+  return trailingPathCount;
+}
