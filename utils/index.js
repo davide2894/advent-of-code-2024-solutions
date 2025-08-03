@@ -189,4 +189,7 @@ export function combinations(arr, size) {
     ...combinations(rest, size),
   ];
 }
+
+export function convertArrayOfStringsToArrayOfNumbers(arr) {
+  return arr.map((str) => str.split("").map((el) => parseInt(el, 10)));
 }
