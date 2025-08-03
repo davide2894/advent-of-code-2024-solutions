@@ -39,7 +39,7 @@ function getFileBlocks(diskMapArray) {
 }
 
 function calculateCheckSum(fileBlocks) {
-  console.log("fileBlocks", fileBlocks.map((n) => n.toString()).join(""));
+  //   console.log("fileBlocks", fileBlocks.map((n) => n.toString()).join(""));
   return fileBlocks.reduce((acc, curr, i) => {
     return acc + curr * i;
   }, 0);
