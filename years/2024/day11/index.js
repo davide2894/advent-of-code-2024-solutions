@@ -3,30 +3,29 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const blinks = 25;
 const lines = readLines(path.join(__dirname, "input.txt"));
 const convertedInput = lines[0].split(" ").map((x) => parseInt(x, 10));
 
 export function part1() {
-  console.log(lines[0].split(" "));
-  console.log("convertedInput", convertedInput);
-  const stones = getStones(convertedInput, blinks);
-  return stones.length;
+  return getStonesNumber(convertedInput, 25);
 }
 
-function getStones(input, blinks) {
+export function part2() {
+  return getStonesNumber(convertedInput, 5);
+}
+
+function getStonesNumber(input, blinks) {
   let stonesResult = input;
   for (let i = 1; i <= blinks; i++) {
     stonesResult = getStonesForBlink(stonesResult).flat();
-    console.log(stonesResult);
   }
-  return stonesResult;
+  return stonesResult.length ?? 0;
 }
 
 function getStonesForBlink(input) {
   // console.log("inside getStonesForBlink function");
   // console.log("input", input);
-  const updateStoreLine = input.map((stone) => {
+  return input.map((stone) => {
     // console.log("====================");
     // console.log("processing stone", stone);
     if (stone === 0) {
@@ -50,11 +49,4 @@ function getStonesForBlink(input) {
       return stone * 2024;
     }
   });
-  // console.log("updateStoreLine", updateStoreLine);
-  return updateStoreLine;
 }
-
-// export function part2() {
-//   console.log("lines", lines);
-//   return "TODO";
-// }
