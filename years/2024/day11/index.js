@@ -11,7 +11,7 @@ export function part1() {
 }
 
 export function part2() {
-  return getStonesNumber(convertedInput, 5);
+  return getStonesNumber(convertedInput, 75);
 }
 
 function getStonesNumber(input, blinks) {
