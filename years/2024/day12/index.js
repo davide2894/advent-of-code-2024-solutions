@@ -2,225 +2,123 @@ import { readInput, readLines } from "../../../utils/index.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
-/**
- * 1) for each line
- *   for each char
- *    if line is the first one
- *        check if region for same char exisits
- *            if it does exist -> add this char to that region count
- *            else
- *                create region for that char
- *    check if the char is also present up and/or left
- *        - if yes
- *            - we are in a region
- *                - actions
- *                   - increase area count for the region
- *                   - increase perimeter count for that cell
- *        - if no
- *            - we are not in a region
- *               - create a new region
- *                 - actions
- *                   - increase area count for the region
- *                   - increase perimeter count for that cell
- *
- * 2) for each region
- *   - calculate price
- *   - add price to total
- * 3) return total
- */
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-let regions = [];
-
-// {
-//   char: "A",
-//   area: 10,
-//   perimeter: 14,
-//   isClosed: false,
-// }
-
-function getRegion(char) {
-  return regions.find((region) => region.char === char);
-}
-
-function closeRegion(char) {
-  // close existing region for that char
-  regions = regions.map((r) => {
-    if (r.char === char) {
-      return { ...r, isClosed: true };
-    } else {
-      return r;
-    }
-  });
-}
-
-function createRegion(char, perimeter) {
-  console.log(`creating region for char ${char}`);
-
-  const region = {
-    char,
-    area: 1,
-    perimeter,
-    isClosed: false,
-  };
-
-  regions = regions.map((r) => {
-    if (r.char === char) {
-      return {
-        ...r,
-        isClosed: true,
-      };
-    } else {
-      return r;
-    }
-  });
-
-  console.log(region);
-
-  regions.push(region);
-}
-
-function updateRegion(char, perimeter) {
-  console.log(
-    `updateRegion function called with char ${char} whose perimeter is ${perimeter}`
-  );
-  regions = regions.map((r) => {
-    if (r.char === char && !r.isClosed) {
-      // update matching region
-      console.log("update matching region with char", char);
-      console.log("region before update", r);
-      const updatedRegion = {
-        ...r,
-        area: r.area + 1,
-        perimeter: r.perimeter + perimeter,
-      };
-      console.log("updatedRegion", updatedRegion);
-      return updatedRegion;
-    } else {
-      return r;
-    }
-  });
-}
-
-function getCharPerimeter(char, charAbove, charAfter, charBelow, charBefore) {
-  // Perimeter increases by 1 for each side when the adjacent char is different
-  let perimeter = 0;
-
-  if (!charBefore || charBefore !== char) {
-    perimeter++;
-  }
-
-  if (!charAbove || charAbove !== char) {
-    perimeter++;
-  }
-
-  if (!charAfter || charAfter !== char) {
-    perimeter++;
-  }
-
-  if (!charBelow || charBelow !== char) {
-    perimeter++;
-  }
-
-  console.log("calculated perimeter is ", perimeter);
-
-  return perimeter;
-}
 
 export function part1() {
-  //TODO: implement region closing logic to avoid putting in same region when in reality
-  // should create new region
-
   const rawLines = readLines(path.join(__dirname, "input.txt"));
-  const lines = rawLines.map((line) => line.split(""));
+  console.log("rawLines", rawLines);
+  const grid = rawLines.map((line) => line.split(""));
+  console.log("grid", grid);
+  const visited = Array(grid.length)
+    .fill()
+    .map(() => Array(grid[0].length).fill(false));
+  console.log("visited", visited);
+  let totalPrice = 0;
 
-  // iterate over each line
-  for (let i = 0; i < lines.length; i++) {
+  // iterate each grid line
+  for (let i = 0; i < grid.length; i++) {
     console.log("===============================");
-    console.log("line", lines[i]);
-    let char,
-      charBefore,
-      charAfter,
-      charBelow,
-      charAbove,
-      charPerimiter = undefined;
+    console.log("line", grid[i]);
+    console.log("visited", visited[i]);
 
-    // if line is the first one
-    //   - check if a region for same char exisits
-    //   - if it does exist
-    //      add this char to that region count
-    //   - else
-    //      create region for that char
+    // iterate each column
+    for (let j = 0; j < grid[0].length; j++) {
+      const cell = grid[i][j];
+      console.log("visited", visited[i][j]);
 
-    // iterate over each char in the line
-    for (let j = 0; j < lines[i].length; j++) {
-      char = lines[i][j];
-      charAbove = i > 0 ? lines[i - 1][j] : undefined;
-      charAfter = j < lines[i].length - 1 ? lines[i][j + 1] : undefined;
-      charBelow = i < lines.length - 1 ? lines[i + 1][j] : undefined;
-      charBefore = j > 0 ? lines[i][j - 1] : undefined;
+      /**
+       * if not visited
+       *  explore regions to find connected components
+       * else
+       *  do nothing
+       */
 
-      // console.log("char", char);
-      // console.log("charAbove", charAbove);
-      // console.log("charBelow", charBelow);
-      // console.log("charBefore", charBefore);
-      // console.log("charAfter", charAfter);
+      if (!visited[i][j]) {
+        console.log(`cell at line ${i} and col ${j} was not yet visited`);
 
-      console.log("-------------------------------");
-      console.log(`char ${char} at line ${i}, index ${j}`);
-
-      if (i == 0) {
-        charPerimiter = getCharPerimeter(
-          char,
-          charAbove,
-          charAfter,
-          charBelow,
-          charBefore
-        );
-        if (getRegion(char)) {
-          updateRegion(char, charPerimiter);
-        } else {
-          createRegion(char, charPerimiter);
-        }
+        const { area, perimeter } = exploreRegions(grid, visited, i, j, cell);
+        console.log("totalPrice", totalPrice);
+        totalPrice += area * perimeter;
       } else {
-        char = lines[i][j];
-        charPerimiter = getCharPerimeter(
-          char,
-          charAbove,
-          charAfter,
-          charBelow,
-          charBefore
-        );
-        // if the same letter is in the cell above or on the left
-        // it means we are in an existing region, so we can update it
-        if (char === charAbove || char === charBefore) {
-          updateRegion(char, charPerimiter);
-        } else {
-          createRegion(char, charPerimiter);
-        }
+        console.log(`cell at line ${i} and col ${j} was already visited`);
       }
-      console.log("regions", regions);
     }
   }
 
-  // Now, we have all the regions
-  // So for each region
-  //  we can calculate the price for each region
-  //  add price to total
-
-  // return the final total
-
-  let total = 0;
-
-  regions.forEach((r) => {
-    total += r.area * r.perimeter;
-  });
-
-  return total;
+  return totalPrice;
 }
 
-// export function part2() {
-//     const lines = readLines(path.join(__dirname, 'input.txt'));
-//     console.log('lines', lines);
-//     return 'TODO';
-// }
+function exploreRegions(grid, visited, row, col, targetChar) {
+  /**
+   * if row is out of bounds, or cell is out of bounds, or cell is already visited, or cell contains a different char than the current one
+   *  stop -> return area of 0 and permiter of 0
+   * else
+   *  i can explore neightbor cells
+   *  mark the cell as visited
+   *  set area to 1
+   *  set perimeter to 0
+   *  for each neightbour cell
+   *    if out of bounds (row or cell) or char is different
+   *      increase perimeter
+   *    else
+   *      is in bounds so:
+   *        explore regiones from that cell on
+   *        increase explore results by that area
+   *        increase explore results by that perimeter
+   *
+   *   return explored region area and perimeter
+   *
+   */
+  if (
+    row < 0 ||
+    row >= grid.length ||
+    col < 0 ||
+    col >= grid[row].length ||
+    visited[row][col] ||
+    grid[row][col] !== targetChar
+  ) {
+    return { area: 0, perimeter: 0 };
+  } else {
+    let area = 1;
+    let perimeter = 0;
+    visited[row][col] = true;
+    const directions = [
+      [0, 1],
+      [1, 0],
+      [-1, 0],
+      [0, -1],
+    ];
+
+    // explore neightbor cells
+    for (const [r, c] of directions) {
+      const nextRow = row + r;
+      const nextCol = col + c;
+
+      // If neighbor cell is out of bounds or not equal to current char
+      // we can increase perimeter by 1
+      if (
+        nextRow < 0 ||
+        nextRow >= grid.length ||
+        nextCol < 0 ||
+        nextCol >= grid[row].length ||
+        grid[nextRow][nextCol] !== targetChar
+      ) {
+        perimeter++;
+      } else {
+        // Explore from this cell as well, recursively
+        const result = exploreRegions(
+          grid,
+          visited,
+          nextRow,
+          nextCol,
+          grid[nextRow][nextCol]
+        );
+        area += result.area;
+        perimeter += result.perimeter;
+      }
+    }
+    return { area, perimeter };
+  }
+}
+
+export function part2() {}
