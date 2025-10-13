@@ -1,3 +1,4 @@
+import { writeFile } from 'fs';
 import { readLines } from '../../../utils/index.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -29,17 +30,7 @@ const size = {
 export function part1() {
     const lines = readLines(path.join(__dirname, 'input.txt'));
 
-    const robots = lines.map(line => {
-        const [position, velocity] = line.split(" ");
-        const positionValues = position.split("=")[1];
-        const velocityValues = velocity.split("=")[1];
-        const [positionX, positionY] = positionValues.split(",").map(v => parseInt(v));
-        const [velocityX, velocityY] = velocityValues.split(",").map(v => parseInt(v));
-        const p = {x: positionX, y: positionY};
-        const v = {x: velocityX, y: velocityY};
-        return {p, v};
-    })
-
+    const robots = getParsedRobots(lines);
     const updatedRobots = robots.map(robot => {
         const newP = {
             // new_px = px + vx * 100 % grid_width
@@ -52,9 +43,6 @@ export function part1() {
     
     const rowToSkip = (size.tall - (size.tall % 2)) / 2;
     const colToSkip = (size.wide - (size.wide % 2)) / 2;
-
-    console.log('rowToSkip', rowToSkip);
-    console.log('colToSkip', colToSkip);
 
     let q1 = 0;
     let q2 = 0;
@@ -73,11 +61,6 @@ export function part1() {
         }
     }
 
-    console.log('q1', q1);
-    console.log('q2', q2);
-    console.log('q3', q3);
-    console.log('q4', q4);
-
     return q1 * q2 * q3 * q4;
 }
 
@@ -89,8 +72,73 @@ function mod(n, m) {
   return ((n % m) + m) % m;
 }
 
-// export function part2() {
-//     const lines = readLines(path.join(__dirname, 'input.txt'));
-//     console.log('lines', lines);    
-//     return 'TODO';
-// }
+function getParsedRobots(lines) {
+    const result = lines.map(line => {
+        const [position, velocity] = line.split(" ");
+        const positionValues = position.split("=")[1];
+        const velocityValues = velocity.split("=")[1];
+        const [positionX, positionY] = positionValues.split(",").map(v => parseInt(v));
+        const [velocityX, velocityY] = velocityValues.split(",").map(v => parseInt(v));
+        const p = {x: positionX, y: positionY};
+        const v = {x: velocityX, y: velocityY};
+        return {p, v};
+    })
+    return result;
+}
+
+
+// 1000 KO
+// 2000 KO
+// 5000 KO
+// 7500 = ???? 
+// 10000 - said the answer is not right+
+
+
+export function part2() {
+    const lines = readLines(path.join(__dirname, 'input.txt'));
+    const parsedRobots = getParsedRobots(lines);
+    let updatedRobots = parsedRobots;
+
+    for(let i = 1001; i <= 1000; i++) {
+        const grid = new Array(size.tall).fill([]).map(row => new Array(size.wide).fill("."))
+        updatedRobots = getUpdatedRobots(parsedRobots, i);
+
+        for (let robot of updatedRobots) {
+            grid[robot.p.y][robot.p.x] = "X";
+        }
+
+        let output = "";
+    
+        for(let row of grid) {
+            output += row.join("");
+            output += "\n";
+        }
+
+        writeFile(`./years/2024/day14/output/${i}.txt`, output, {
+            encoding: "utf-8",
+            flag: "w"
+        }, (err) => {
+            if (err) {
+                console.error("Error writing file", err);
+            }
+        });
+    }
+}
+
+function getUpdatedRobots(robots, speed) {
+
+    const result = robots.map(robot => {
+    
+        const newP = {
+            // new_px = px + vx * 100 % grid_width
+            x: mod(robot.p.x + robot.v.x * speed, size.wide),
+            // new_py = py + vy * 100 % grid_height
+            y: mod(robot.p.y + robot.v.y * speed, size.tall),
+        }
+    
+        return {p: newP, v: robot.v};
+
+    });
+    
+    return result;
+}
