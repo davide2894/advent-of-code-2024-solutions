@@ -86,53 +86,14 @@ function getParsedRobots(lines) {
     return result;
 }
 
-
-// 1000 KO
-// 2000 KO
-// 5000 KO
-// 7500 = ???? 
-// 10000 - said the answer is not right+
-
-
-export function part2() {
-    const lines = readLines(path.join(__dirname, 'input.txt'));
-    const parsedRobots = getParsedRobots(lines);
-    let updatedRobots = parsedRobots;
-
-    for(let i = 1001; i <= 1000; i++) {
-        const grid = new Array(size.tall).fill([]).map(row => new Array(size.wide).fill("."))
-        updatedRobots = getUpdatedRobots(parsedRobots, i);
-
-        for (let robot of updatedRobots) {
-            grid[robot.p.y][robot.p.x] = "X";
-        }
-
-        let output = "";
-    
-        for(let row of grid) {
-            output += row.join("");
-            output += "\n";
-        }
-
-        writeFile(`./years/2024/day14/output/${i}.txt`, output, {
-            encoding: "utf-8",
-            flag: "w"
-        }, (err) => {
-            if (err) {
-                console.error("Error writing file", err);
-            }
-        });
-    }
-}
-
 function getUpdatedRobots(robots, speed) {
 
     const result = robots.map(robot => {
     
         const newP = {
-            // new_px = px + vx * 100 % grid_width
+            // Formula: new_px = px + vx * 100 % grid_width
             x: mod(robot.p.x + robot.v.x * speed, size.wide),
-            // new_py = py + vy * 100 % grid_height
+            // Formula: new_py = py + vy * 100 % grid_height
             y: mod(robot.p.y + robot.v.y * speed, size.tall),
         }
     
@@ -142,3 +103,64 @@ function getUpdatedRobots(robots, speed) {
     
     return result;
 }
+
+function printFinalResult(grid, iteration) {
+    let output = "";
+
+    for(let row of grid) {
+        output += row.join("");
+        output += "\n";
+    }
+
+    writeFile(`./years/2024/day14/output/${iteration}.txt`, output, {
+        encoding: "utf-8",
+        flag: "w"
+    }, (err) => {
+        if (err) {
+            console.error("Error writing file", err);
+        }
+    });
+}
+
+
+export function part2() {
+    const lines = readLines(path.join(__dirname, 'input.txt'));
+    let maxIterationsGuess = 10000
+    const parsedRobots = getParsedRobots(lines);
+    let updatedRobots = parsedRobots;
+    let result = 0
+
+    for(let i = 0; i <= maxIterationsGuess; i++) {
+        const grid = new Array(size.tall).fill([]).map(row => new Array(size.wide).fill("."))
+        updatedRobots = getUpdatedRobots(parsedRobots, i);
+
+        for (let robot of updatedRobots) {
+            grid[robot.p.y][robot.p.x] = "1";
+        }
+                
+        const maxConsecutive = 8;
+        let count = 0;
+        let found = false;
+
+        for(let r = 0; r < grid.length; r++) {
+            for(let c = 0; c < grid[r].length; c++) {
+                if (grid[r][c] === "1") {
+                    count++;
+                    if (count >= maxConsecutive) {
+                        found = true;
+                        break;
+                    }
+                } else {
+                    count = 0;
+                }
+            }
+        }
+        if(found) {
+            console.log(`Found grid with at least ${maxConsecutive} consecutive '1's at iteration ${i}`); 
+            result = i;
+            printFinalResult(grid, i);
+        }  
+    }
+    return result;
+}
+
