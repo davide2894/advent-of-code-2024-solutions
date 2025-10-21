@@ -1,7 +1,7 @@
 # todo
-[] parse input 
-[] extract map as grid (array of rows, each row is array of chars)
-[] extract movements as array of strings
+[x] parse input 
+[x] extract map as grid (array of rows, each row is array of chars)
+[x] extract movements as array of strings
 [] predict the robot movements
   A movement is as follows:
     - if robot or box meets a wall (#) in the direction of movement, it stops moving in that direction
