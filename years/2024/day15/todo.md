@@ -24,5 +24,4 @@
       - else 
         - if next char is box (0) call function recursiveluy
 [] calculate the robot gps coordinates after all movements
-[] calculate the manhattan distance from (0,0) to robot gps coordinates
 [] submit answer
