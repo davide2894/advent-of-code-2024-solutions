@@ -36,23 +36,9 @@ function calcGridAfterOneMove(grid, move) {
       col + (move === MOVE.LEFT ? -1 : move === MOVE.RIGHT ? 1 : 0);
     const nextCell = grid[newRow][newCol];
 
-    console.log(
-      "move",
-      move,
-      "from",
-      row,
-      col,
-      "to",
-      newRow,
-      newCol,
-      "nextCell",
-      nextCell
-    );
-
     if (nextCell === "#" || nextCell === undefined) {
       return false;
     } else if (nextCell === ".") {
-      console.log("moving to empty cell");
       grid[newRow][newCol] = grid[row][col]; // Move whatever is in current cell
       grid[row][col] = ".";
       return true;
@@ -108,9 +94,19 @@ export function part1() {
     .filter((el) => el !== "")
     .map((m) => m.split(""))
     .flat();
-  console.log("moves", moves);
+
   const gridAfterMoves = getGridAfterMoves(grid, moves);
-  const sumOfAllBoxes = calculateSumOfAllBoxes(gridAfterMoves);
+
+  let sumOfAllBoxes = 0;
+
+  for (let row = 0; row < gridAfterMoves.length; row++) {
+    for (let col = 0; col < gridAfterMoves[row].length; col++) {
+      if (gridAfterMoves[row][col] === "O") {
+        sumOfAllBoxes += 100 * row + col;
+      }
+    }
+  }
+
   return sumOfAllBoxes;
 }
 
