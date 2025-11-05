@@ -3,6 +3,6 @@ node_modules/
 *.log
 .env
 .vscode/settings.json
-
+**/output*.txt
 # Uncomment the line below if you want to keep your inputs private
 # **/input.txt
