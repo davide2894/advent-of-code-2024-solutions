@@ -11,56 +11,107 @@ const MOVE = {
   RIGHT: ">",
 };
 
-function calculateSumOfAllBoxes(grid) {}
-
-function getRobotCoordinates(grid) {
-  for (let row = 0; row < grid.length; row++) {
-    for (let col = 0; col < grid[row].length; col++) {
-      if (grid[row][col] === "@") {
-        const coordinates = {
-          row,
-          col,
-        };
-        return coordinates;
-      }
-    }
-  }
-}
-
 function calcGridAfterOneMove(grid, move) {
-  const resultGrid = grid;
+  const resultGrid = grid.map((row) => [...row]); // Create a copy
 
-  function recursiveFn(row, col, move, grid) {
+  function canMove(row, col, move, grid) {
+    const newRow = row + (move === MOVE.UP ? -1 : move === MOVE.DOWN ? 1 : 0);
+    const newCol =
+      col + (move === MOVE.LEFT ? -1 : move === MOVE.RIGHT ? 1 : 0);
+
+    if (
+      newRow < 0 ||
+      newRow >= grid.length ||
+      newCol < 0 ||
+      newCol >= grid[0].length
+    ) {
+      return false;
+    }
+
+    const nextCell = grid[newRow][newCol];
+
+    if (nextCell === "#") {
+      return false;
+    }
+
+    if (nextCell === ".") {
+      return true;
+    }
+
+    // Horizontal movement
+    if (move === MOVE.LEFT || move === MOVE.RIGHT) {
+      return canMove(newRow, newCol, move, grid);
+    }
+
+    // Vertical movement with wide boxes
+    if (nextCell === "[" || nextCell === "]") {
+      const otherHalfCol = nextCell === "[" ? newCol + 1 : newCol - 1;
+      return (
+        canMove(newRow, newCol, move, grid) &&
+        canMove(newRow, otherHalfCol, move, grid)
+      );
+    }
+
+    // Old single box (for part 1 compatibility)
+    if (nextCell === "O") {
+      return canMove(newRow, newCol, move, grid);
+    }
+
+    return false;
+  }
+
+  function doMove(row, col, move, grid) {
     const newRow = row + (move === MOVE.UP ? -1 : move === MOVE.DOWN ? 1 : 0);
     const newCol =
       col + (move === MOVE.LEFT ? -1 : move === MOVE.RIGHT ? 1 : 0);
     const nextCell = grid[newRow][newCol];
 
-    if (nextCell === "#" || nextCell === undefined) {
-      return false;
-    } else if (nextCell === ".") {
-      grid[newRow][newCol] = grid[row][col]; // Move whatever is in current cell
+    if (nextCell === ".") {
+      grid[newRow][newCol] = grid[row][col];
       grid[row][col] = ".";
-      return true;
-    } else {
-      if (recursiveFn(newRow, newCol, move, grid)) {
-        // Box was pushed successfully, now move current cell
-        grid[newRow][newCol] = grid[row][col];
-        grid[row][col] = ".";
-        return true;
-      }
+      return;
     }
-    return false; // Box couldn't be pushed
+
+    // Horizontal movement
+    if (move === MOVE.LEFT || move === MOVE.RIGHT) {
+      doMove(newRow, newCol, move, grid);
+      grid[newRow][newCol] = grid[row][col];
+      grid[row][col] = ".";
+      return;
+    }
+
+    // Vertical movement
+    if (nextCell === "[" || nextCell === "]") {
+      const otherHalfCol = nextCell === "[" ? newCol + 1 : newCol - 1;
+      // Move both halves of the box
+      doMove(newRow, newCol, move, grid);
+      doMove(newRow, otherHalfCol, move, grid);
+      grid[newRow][newCol] = grid[row][col];
+      grid[row][col] = ".";
+      return;
+    }
+
+    if (nextCell === "O") {
+      doMove(newRow, newCol, move, grid);
+      grid[newRow][newCol] = grid[row][col];
+      grid[row][col] = ".";
+      return;
+    }
   }
 
+  // Find robot and try to move
   for (let row = 0; row < grid.length; row++) {
     for (let col = 0; col < grid[row].length; col++) {
       if (grid[row][col] === "@") {
-        recursiveFn(row, col, move, grid);
+        if (canMove(row, col, move, resultGrid)) {
+          doMove(row, col, move, resultGrid);
+        }
         return resultGrid;
       }
     }
   }
+
+  return resultGrid;
 }
 
 function getGridAfterMoves(grid, moves) {
@@ -111,15 +162,38 @@ export function part1() {
 }
 
 export function part2() {
-  const lines = readLines(path.join(__dirname, "input_2.txt"));
-  const grid = lines.splice(0, lines.indexOf("")).map((row) => row.split(""));
+  const lines = readLines(path.join(__dirname, "input.txt"));
+  const originalGrid = lines
+    .splice(0, lines.indexOf(""))
+    .map((row) => row.split(""));
   const moves = lines
     .splice(lines.indexOf(""))
     .filter((el) => el !== "")
     .map((m) => m.split(""))
     .flat();
-  console.log("lines", lines);
-  console.log("grid", grid);
-  console.log("moves", moves);
-  return "TODO";
+
+  // Expand the grid for part 2
+  const grid = originalGrid.map((row) => {
+    return row.flatMap((cell) => {
+      if (cell === "#") return ["#", "#"];
+      if (cell === "O") return ["[", "]"];
+      if (cell === ".") return [".", "."];
+      if (cell === "@") return ["@", "."];
+      return [cell, cell];
+    });
+  });
+
+  const gridAfterMoves = getGridAfterMoves(grid, moves);
+
+  let sumOfAllBoxes = 0;
+
+  for (let row = 0; row < gridAfterMoves.length; row++) {
+    for (let col = 0; col < gridAfterMoves[row].length; col++) {
+      if (gridAfterMoves[row][col] === "[") {
+        sumOfAllBoxes += 100 * row + col;
+      }
+    }
+  }
+
+  return sumOfAllBoxes;
 }
