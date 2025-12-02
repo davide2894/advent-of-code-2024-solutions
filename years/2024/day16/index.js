@@ -6,10 +6,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const lines = readLines(path.join(__dirname, "input.txt"));
 const grid = lines.map((line) => line.split(""));
 const DIRECTIONS = [
-  { row: -1, col: 0, name: "UP" },    // index 0
-  { row: 0, col: 1, name: "RIGHT" },  // index 1
-  { row: 1, col: 0, name: "DOWN" },   // index 2
-  { row: 0, col: -1, name: "LEFT" },  // index 3
+  { row: -1, col: 0, name: "UP" }, // index 0
+  { row: 0, col: 1, name: "RIGHT" }, // index 1
+  { row: 1, col: 0, name: "DOWN" }, // index 2
+  { row: 0, col: -1, name: "LEFT" }, // index 3
 ];
 
 function findCharCoordinates(grid, char) {
@@ -119,7 +119,7 @@ export function part1() {
     //   dirIndex=1 (RIGHT): (1+3) % 4 = 0 (UP)    ✓
     //   dirIndex=2 (DOWN):  (2+3) % 4 = 1 (RIGHT) ✓
     //   dirIndex=3 (LEFT):  (3+3) % 4 = 2 (DOWN)  ✓
-    // 
+    //
     // Why +3 instead of -1?
     // Because (-1) % 4 = -1 in JavaScript (not 3!)
     // So (0-1) % 4 = -1 (WRONG!)
