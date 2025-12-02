@@ -193,3 +193,11 @@ export function combinations(arr, size) {
 export function convertArrayOfStringsToArrayOfNumbers(arr) {
   return arr.map((str) => str.split("").map((el) => parseInt(el, 10)));
 }
+
+export const DIRECTIONS = {
+  UP: { row: 0, col: -1 },
+  DOWN: { row: 0, col: 1 },
+  LEFT: { row: -1, col: 0 },
+  RIGHT: { row: 1, col: 0 },
+};
+
