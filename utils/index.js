@@ -201,3 +201,19 @@ export const DIRECTIONS = {
   RIGHT: { row: 1, col: 0 },
 };
 
+export function isValidGridCell(grid, row, col) {
+  /* 
+    - Basically, a cell is valid if 
+    - it's inside the grid, hence
+      - row is less than or rqual to grid length
+      - col is less than or equal to grid[row] length
+    - char at grid[row][col] is not a wall (assuming walls are represented by '#')
+   */
+  return (
+    row >= 0 &&
+    row < grid.length &&
+    col >= 0 &&
+    col < grid[0].length &&
+    grid[row][col] !== "#"
+  );
+}
