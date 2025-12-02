@@ -2,7 +2,7 @@
 [x] parse input 
 [x] extract map as grid (array of rows, each row is array of chars)
 [x] extract movements as array of strings
-[] predict the robot movements
+[X] predict the robot movements
   A movement is as follows:
     - if robot or box meets a wall (#) in the direction of movement, it stops moving in that direction
     - if robot meets empty space (.) in the direction of movement
@@ -23,5 +23,5 @@
       - else if next char is empty space (.) swap current box with the (.)
       - else 
         - if next char is box (0) call function recursiveluy
-[] calculate the robot gps coordinates after all movements
-[] submit answer
+[X] calculate the robot gps coordinates after all movements
+[X] submit answer
