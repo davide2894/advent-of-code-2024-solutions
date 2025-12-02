@@ -6,10 +6,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const lines = readLines(path.join(__dirname, "input.txt"));
 const grid = lines.map((line) => line.split(""));
 const DIRECTIONS = [
-  { row: -1, col: 0, name: "UP" }, // 0
-  { row: 0, col: 1, name: "RIGHT" }, // 1
-  { row: 1, col: 0, name: "DOWN" }, // 2
-  { row: 0, col: -1, name: "LEFT" }, // 3
+  { row: -1, col: 0, name: "UP" },    // index 0
+  { row: 0, col: 1, name: "RIGHT" },  // index 1
+  { row: 1, col: 0, name: "DOWN" },   // index 2
+  { row: 0, col: -1, name: "LEFT" },  // index 3
 ];
 
 function findCharCoordinates(grid, char) {
@@ -59,24 +59,18 @@ export function part1() {
   });
   minScores.set(stateKey(S[0], S[1], startDirIndex), 0);
 
-  let finalScore = Infinity;
-
   while (!isPQEmpty(pq)) {
     const current = pqPop(pq);
     const { row, col, dirIndex, score } = current;
 
-    // Optimization: If we've found a path to this state with a lower score already, skip
-    if (score > (minScores.get(stateKey(row, col, dirIndex)) ?? Infinity)) {
+    const currentKey = stateKey(row, col, dirIndex);
+    // Skip if we've already found a better path to this state
+    if (minScores.has(currentKey) && score > minScores.get(currentKey)) {
       continue;
     }
 
     // Check if we reached the end
     if (grid[row][col] === "E") {
-      if (score < finalScore) {
-        finalScore = score;
-      }
-      // We continue to find potentially shorter paths if any (though Dijkstra guarantees first found is shortest)
-      // But since we just want the shortest score, we can return immediately if we trust the PQ order.
       return score;
     }
 
@@ -95,32 +89,52 @@ export function part1() {
     ) {
       const newScore = score + 1;
       const key = stateKey(nr, nc, dirIndex);
-      if (newScore < (minScores.get(key) ?? Infinity)) {
+
+      // Only update if we haven't visited this state OR we found a better path
+      if (!minScores.has(key) || newScore < minScores.get(key)) {
         minScores.set(key, newScore);
         pqPush(pq, { row: nr, col: nc, dirIndex, score: newScore });
       }
     }
 
-    // 2. Turn Clockwise
+    // 2. Turn Clockwise (90 degrees right)
+    // Modulo wraps around: 0→1, 1→2, 2→3, 3→0
+    // Examples:
+    //   dirIndex=0 (UP):    (0+1) % 4 = 1 (RIGHT) ✓
+    //   dirIndex=1 (RIGHT): (1+1) % 4 = 2 (DOWN)  ✓
+    //   dirIndex=2 (DOWN):  (2+1) % 4 = 3 (LEFT)  ✓
+    //   dirIndex=3 (LEFT):  (3+1) % 4 = 0 (UP)    ✓ wraps around!
     const cwDirIndex = (dirIndex + 1) % 4;
     const cwScore = score + 1000;
     const cwKey = stateKey(row, col, cwDirIndex);
-    if (cwScore < (minScores.get(cwKey) ?? Infinity)) {
+    if (!minScores.has(cwKey) || cwScore < minScores.get(cwKey)) {
       minScores.set(cwKey, cwScore);
       pqPush(pq, { row, col, dirIndex: cwDirIndex, score: cwScore });
     }
 
-    // 3. Turn Counter-Clockwise
+    // 3. Turn Counter-Clockwise (90 degrees left)
+    // Adding 3 is same as subtracting 1 (in modulo 4 arithmetic)
+    // Examples:
+    //   dirIndex=0 (UP):    (0+3) % 4 = 3 (LEFT)  ✓
+    //   dirIndex=1 (RIGHT): (1+3) % 4 = 0 (UP)    ✓
+    //   dirIndex=2 (DOWN):  (2+3) % 4 = 1 (RIGHT) ✓
+    //   dirIndex=3 (LEFT):  (3+3) % 4 = 2 (DOWN)  ✓
+    // 
+    // Why +3 instead of -1?
+    // Because (-1) % 4 = -1 in JavaScript (not 3!)
+    // So (0-1) % 4 = -1 (WRONG!)
+    // But (0+3) % 4 = 3 (CORRECT!)
     const ccwDirIndex = (dirIndex + 3) % 4;
     const ccwScore = score + 1000;
     const ccwKey = stateKey(row, col, ccwDirIndex);
-    if (ccwScore < (minScores.get(ccwKey) ?? Infinity)) {
+    if (!minScores.has(ccwKey) || ccwScore < minScores.get(ccwKey)) {
       minScores.set(ccwKey, ccwScore);
       pqPush(pq, { row, col, dirIndex: ccwDirIndex, score: ccwScore });
     }
   }
 
-  return finalScore;
+  // If we exhausted the queue without finding E, no path exists
+  return -1;
 }
 
 // export function part2() {
