@@ -164,6 +164,11 @@ export function solution() {
   const queue = [...endStates];
   const visited = new Set(endStates);
 
+  console.log({
+    queue,
+    visited: visited,
+  });
+
   while (queue.length > 0) {
     // Get next state to process
     const stateStr = pqPop(queue);
