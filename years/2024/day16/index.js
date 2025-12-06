@@ -48,6 +48,9 @@ export function part1() {
   const S = findCharCoordinates(grid, "S");
   const pq = createPQ();
   const minScores = new Map();
+  const predecessors = new Map(); // value: array of parent stateKeys
+  let minEndScore = undefined;
+  let endStates = [];
 
   // Initial state: Start at S, facing RIGHT (index 1), score 0
   const startDirIndex = 1; // RIGHT
@@ -71,7 +74,16 @@ export function part1() {
 
     // Check if we reached the end
     if (grid[row][col] === "E") {
-      return score;
+      console.log("Minimum score to reach E:", score);
+      console.log({ score, predecessorsCount: predecessors.size });
+      if (!minEndScore || score < minEndScore) {
+        minEndScore = score;
+        endStates = []; // Clear old states
+        endStates.push(currentKey);
+      } else if (score === minEndScore) {
+        endStates.push(currentKey);
+      }
+      continue; // I'm done with this state, move to the next one in queue
     }
 
     // 1. Move Forward
@@ -93,7 +105,12 @@ export function part1() {
       // Only update if we haven't visited this state OR we found a better path
       if (!minScores.has(key) || newScore < minScores.get(key)) {
         minScores.set(key, newScore);
+        predecessors.set(key, [currentKey]);
         pqPush(pq, { row: nr, col: nc, dirIndex, score: newScore });
+      } else if (newScore === minScores.get(key)) {
+        if (predecessors.has(key)) {
+          predecessors.get(key).push(currentKey);
+        }
       }
     }
 
@@ -109,7 +126,12 @@ export function part1() {
     const cwKey = stateKey(row, col, cwDirIndex);
     if (!minScores.has(cwKey) || cwScore < minScores.get(cwKey)) {
       minScores.set(cwKey, cwScore);
+      predecessors.set(cwKey, [currentKey]);
       pqPush(pq, { row, col, dirIndex: cwDirIndex, score: cwScore });
+    } else if (cwScore === minScores.get(cwKey)) {
+      if (predecessors.has(cwKey)) {
+        predecessors.get(cwKey).push(currentKey);
+      }
     }
 
     // 3. Turn Counter-Clockwise (90 degrees left)
@@ -129,16 +151,15 @@ export function part1() {
     const ccwKey = stateKey(row, col, ccwDirIndex);
     if (!minScores.has(ccwKey) || ccwScore < minScores.get(ccwKey)) {
       minScores.set(ccwKey, ccwScore);
+      predecessors.set(ccwKey, [currentKey]);
       pqPush(pq, { row, col, dirIndex: ccwDirIndex, score: ccwScore });
+    } else if (ccwScore === minScores.get(ccwKey)) {
+      if (predecessors.has(ccwKey)) {
+        predecessors.get(ccwKey).push(currentKey);
+      }
     }
   }
 
   // If we exhausted the queue without finding E, no path exists
-  return -1;
+  return minEndScore;
 }
-
-// export function part2() {
-//     const lines = readLines(path.join(__dirname, 'input.txt'));
-//     console.log('lines', lines);
-//     return 'TODO';
-// }
