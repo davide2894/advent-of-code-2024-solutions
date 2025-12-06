@@ -44,7 +44,7 @@ function stateKey(row, col, dirIndex) {
   return `${row},${col},${dirIndex}`;
 }
 
-export function part1() {
+export function solution() {
   const S = findCharCoordinates(grid, "S");
   const pq = createPQ();
   const minScores = new Map();
@@ -61,6 +61,7 @@ export function part1() {
     score: 0,
   });
   minScores.set(stateKey(S[0], S[1], startDirIndex), 0);
+  predecessors.set(stateKey(S[0], S[1], startDirIndex), []);
 
   while (!isPQEmpty(pq)) {
     const current = pqPop(pq);
@@ -74,8 +75,6 @@ export function part1() {
 
     // Check if we reached the end
     if (grid[row][col] === "E") {
-      console.log("Minimum score to reach E:", score);
-      console.log({ score, predecessorsCount: predecessors.size });
       if (!minEndScore || score < minEndScore) {
         minEndScore = score;
         endStates = []; // Clear old states
@@ -160,6 +159,28 @@ export function part1() {
     }
   }
 
-  // If we exhausted the queue without finding E, no path exists
-  return minEndScore;
+  // add backtracking here
+  const tilesOnOptimalPaths = new Set();
+  const queue = [...endStates];
+  const visited = new Set(endStates);
+
+  while (queue.length > 0) {
+    // Get next state to process
+    const stateStr = pqPop(queue);
+    //Parse the state string "1,13,0" into row=1, col=13, direction=0.
+    const [row, col, dirIndex] = stateStr.split(",").map(Number);
+    tilesOnOptimalPaths.add(`${row},${col}`);
+    const preds = predecessors.get(stateStr) || [];
+    for (const pred of preds) {
+      if (!visited.has(pred)) {
+        visited.add(pred);
+        queue.push(pred);
+      }
+    }
+  }
+
+  return JSON.stringify({
+    part1: minEndScore,
+    part2: tilesOnOptimalPaths.size,
+  });
 }
