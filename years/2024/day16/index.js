@@ -167,7 +167,7 @@ export function solution() {
   while (queue.length > 0) {
     // Get next state to process
     const stateStr = pqPop(queue);
-    //Parse the state string "1,13,0" into row=1, col=13, direction=0.
+    // Parse the state string "1,13,0" into row=1, col=13, direction=0.
     const [row, col, dirIndex] = stateStr.split(",").map(Number);
     tilesOnOptimalPaths.add(`${row},${col}`);
     const preds = predecessors.get(stateStr) || [];
