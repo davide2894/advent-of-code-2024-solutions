@@ -1,3 +1,4 @@
+import { get } from "http";
 import { readInput, readLines } from "../../../utils/index.js";
 import path, { parse } from "path";
 import { fileURLToPath } from "url";
@@ -17,19 +18,37 @@ export function solution() {
    *
    */
 
-  function adv(opCode, operand) {
-    const denominator = 2 ^ operand;
-    return opCode / denominator;
+  function dv(numerator, operand) {
+    console.log(
+      "Calculating DV with numerator:",
+      numerator,
+      "and operand:",
+      operand
+    );
+    const denominator = 2 ** operand;
+    const result = numerator / denominator;
+    console.log("result of dv:", result);
+    return result;
+  }
+
+  function adv(registerA, operand) {
+    return Math.trunc(dv(registerA, operand));
+  }
+
+  function bdv(registerA, operand) {
+    return Math.trunc(dv(registerA, operand));
+  }
+
+  function cdv(registerA, operand) {
+    return Math.trunc(dv(registerA, operand));
   }
 
   function bxl(registerB, instructionLiteralOperand) {
-    const result = registerB ^ instructionLiteralOperand; // calc result
-    registerB = result;
+    return registerB ^ instructionLiteralOperand; // calc result
   }
 
   function bst(combo) {
-    const result = combo % 8;
-    registerB = result;
+    return combo % 8;
   }
 
   function jnz(registerA) {
@@ -42,34 +61,37 @@ export function solution() {
   }
 
   function bxc(registerB, registerC) {
-    const result = registerB ^ registerC;
-    registerB = result;
+    return registerB ^ registerC;
   }
 
-  function out() {
+  function out(combo) {
     //The out instruction (opcode 5) calculates the value of its combo operand modulo 8,
     // then outputs that value. (If a program outputs multiple values, they are separated by commas.)
-
-    outRsesults.push(registerB % 8);
-  }
-
-  function bdv(opCode, operand) {
-    registerB = adv(opCode, operand);
-  }
-
-  function cdv(opCode, operand) {
-    registerB = adv(opCode, operand);
+    return combo % 8;
   }
 
   function getOperand(input) {
     switch (input) {
       case 4:
+        console.log(
+          "Since input is 4, returning register A as operand, which is:",
+          registerA
+        );
         return registerA;
       case 5:
+        console.log(
+          "Since input is 5, returning register B as operand, which is:",
+          registerB
+        );
         return registerB;
       case 6:
+        console.log(
+          "Since input is 6, returning register C as operand, which is:",
+          registerC
+        );
         return registerC;
       default:
+        console.log(`since input is ${input}, returning it as operand`);
         return input;
     }
   }
@@ -92,43 +114,62 @@ export function solution() {
   console.log("Instructions:", instructions);
 
   for (let i = 0; i < instructions.length; i += 2) {
+    console.log("Processing instruction at index:", i);
+    console.log(
+      "Current Registers - A:",
+      registerA,
+      "B:",
+      registerB,
+      "C:",
+      registerC
+    );
     const opCode = instructions[i];
-    const operand = getOperand(instructions[i + 1]);
-    console.log("OpCode:", opCode, "Operand:", operand);
+    let operand = getOperand(instructions[i + 1]);
     switch (opCode) {
       case 0:
-        console.log("case 0, Executing BXL");
-        bxl(registerB, operand);
+        console.log("case 0, Executing ADV");
+        registerA = adv(registerA, operand);
         break;
       case 1:
-        console.log("case 1, Executing BST");
-        bst(parseInt(operand));
+        console.log("case 1, Executing BXL");
+        operand = instructions[i + 1];
+        registerB = bxl(registerB, operand);
         break;
       case 2:
-        console.log("case 2, Executing JNZ");
-        jnz(registerA);
+        console.log("case 2, Executing BST");
+        registerB = bst(operand);
         break;
       case 3:
-        console.log("case 3, Executing BXC");
-        bxc(registerB, registerC);
+        console.log("case 3, Executing JNZ");
+        operand = instructions[i + 1];
+        if (registerA !== 0) {
+          console.log("current operand is:", operand);
+          console.log("current i:", i);
+          console.log("setting i to:", operand - 2);
+          console.log("new i will be:", operand - 2);
+          i = operand - 2;
+        }
         break;
       case 4:
-        console.log("case 4, Executing OUT");
-        out();
+        console.log("case 4, Executing BXC");
+        registerB = bxc(registerB, registerC);
         break;
       case 5:
-        console.log("case 5, Executing BDV");
-        bdv(registerB, operand);
+        console.log("case 5, Executing OUT");
+        outRsesults.push(out(operand));
         break;
       case 6:
-        console.log("case 6, Executing CDV");
-        cdv(registerC, operand);
+        console.log("case 6, Executing BDV");
+        registerB = bdv(registerA, operand);
+        break;
+      case 7:
+        console.log("case 7, Executing CDV");
+        registerC = cdv(registerA, operand);
         break;
     }
   }
 
-  //TODO: code is there but doesn't woerk as intended yet
   console.log("Output results:", outRsesults);
 
-  return "TODO";
+  return outRsesults.join(",");
 }
