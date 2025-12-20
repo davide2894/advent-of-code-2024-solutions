@@ -47,7 +47,7 @@ export function run(regA, regB, regC) {
   }
 
   function bst(combo) {
-    return combo % 8;
+    return ((combo % 8) + 8) % 8;
   }
 
   function jnz(registerA) {
@@ -66,7 +66,7 @@ export function run(regA, regB, regC) {
   function out(combo) {
     //The out instruction (opcode 5) calculates the value of its combo operand modulo 8,
     // then outputs that value. (If a program outputs multiple values, they are separated by commas.)
-    return combo % 8;
+    return ((combo % 8) + 8) % 8;
   }
 
   function getOperand(input) {
@@ -133,26 +133,50 @@ export function part1() {
 }
 
 export function part2() {
-  let registerA = parseInt(lines[0].split(": ")[1]);
   let registerB = parseInt(lines[1].split(": ")[1]);
   let registerC = parseInt(lines[2].split(": ")[1]);
 
-  // In part 1 the program loops 6 times, and
-  // each iteration it divides register A by 8
-  // Strategy:
-  // - calc min and max attempts to reach 0 in register A
-  // - brute force program executiiton with register A values in that range
+  // Build candidates iteratively, starting from length 1 up to full program length
+  let candidates = [0];
 
-  const minAttempts = 8 ** 15;
-  const maxAttempts = 8 ** 16;
+  for (let length = 1; length <= instructions.length; length++) {
+    const targetSuffix = instructions.slice(-length);
+    const newCandidates = [];
 
-  //TODO:
-  // this brute force strategy doesnt work for very large ranges...
-  // Need to find a better way
-  for (let i = minAttempts; i <= maxAttempts; i++) {
-    const result = run(i, registerB, registerC);
-    if (result === instructions.join(",")) {
-      return i;
+    for (const baseA of candidates) {
+      for (let digit = 0; digit < 8; digit++) {
+        const candidateA = baseA * 8 + digit;
+        const output = run(candidateA, registerB, registerC)
+          .split(",")
+          .map((x) => parseInt(x));
+
+        if (output.length >= length) {
+          const outputSuffix = output.slice(-length);
+          if (outputSuffix.every((v, i) => v === targetSuffix[i])) {
+            newCandidates.push(candidateA);
+          }
+        }
+      }
+    }
+
+    if (newCandidates.length === 0) {
+      return "No solution found";
+    }
+
+    candidates = newCandidates;
+  }
+
+  // Return the smallest candidate that produces the full output
+  candidates.sort((a, b) => a - b);
+  for (const candidate of candidates) {
+    const output = run(candidate, registerB, registerC)
+      .split(",")
+      .map((x) => parseInt(x));
+    if (
+      output.length === instructions.length &&
+      output.every((v, i) => v === instructions[i])
+    ) {
+      return candidate;
     }
   }
 
