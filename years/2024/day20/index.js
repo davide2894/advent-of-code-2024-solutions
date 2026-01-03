@@ -3,24 +3,23 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const lines = readLines(path.join(__dirname, "input.txt"));
+let queue = [];
+let S = null;
 
-export function part1() {
-  const lines = readLines(path.join(__dirname, "input.txt"));
-  let queue = [];
-  let S = null;
-
-  // find S
-  for (let i = 0; i < lines.length; i++) {
-    for (let j = 0; j < lines[i].length; j++) {
-      if (lines[i][j] === "S") {
-        S = [i, j];
-        queue.push([i, j]);
-      }
+// find S
+for (let i = 0; i < lines.length; i++) {
+  for (let j = 0; j < lines[i].length; j++) {
+    if (lines[i][j] === "S") {
+      S = [i, j];
+      queue.push([i, j]);
     }
   }
+}
 
-  const distances = new Map([[`${S[0]},${S[1]}`, 0]]);
+const distances = new Map([[`${S[0]},${S[1]}`, 0]]);
 
+export function part1() {
   // find optmial path by using BFS algorithm
   while (queue.length) {
     const [x, y] = queue.shift();
@@ -89,8 +88,26 @@ export function part1() {
   return counter;
 }
 
-// export function part2() {
-//   const lines = readLines(path.join(__dirname, "input.txt"));
-//   console.log("lines", lines);
-//   return "TODO";
-// }
+export function part2() {
+  // calculate every cheat for each pair of points by using Manhattan distance
+
+  let counter = 0;
+
+  const pathPoints = Array.from(distances.keys()).map((key) => {
+    const [x, y] = key.split(",").map(Number);
+    return { x, y, distance: distances.get(key) };
+  });
+
+  for (let i = 0; i < pathPoints.length; i++) {
+    for (let j = i + 1; j < pathPoints.length; j++) {
+      const p1 = pathPoints[i];
+      const p2 = pathPoints[j];
+      const manhattanDistance = Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
+      if (manhattanDistance <= 20) {
+        p2.distance - p1.distance - manhattanDistance >= 100 && counter++;
+      }
+    }
+  }
+
+  return counter;
+}
