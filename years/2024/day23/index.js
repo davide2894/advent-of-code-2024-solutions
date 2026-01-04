@@ -1,4 +1,4 @@
-import { readInput, readLines } from "../../../utils/index.js";
+import { readLines } from "../../../utils/index.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
