@@ -33,7 +33,7 @@ export function part1() {
   console.log(knownWires);
   console.log(gates);
   const wires = new Map();
-  const outputWires = new Map();
+  const outputs = new Map();
   knownWires.forEach((wire) =>
     wires.set(wire.split(": ")[0], parseInt(wire.split(": ")[1]))
   );
@@ -64,7 +64,7 @@ export function part1() {
       // my calculation returns 0001011111100
       // while expected is      0011111101000
       wires.set(outputWire, outputValue);
-      outputWires.set(outputWire, outputValue);
+      outputs.set(outputWire, outputValue);
       processedGates.push(gate);
     }
 
@@ -74,8 +74,17 @@ export function part1() {
     }
   }
 
+  console.log("outputs", outputs);
+
   // process final output
-  const sortedMap = new Map([...outputWires.entries()].sort());
+  const sortedMap = new Map(
+    [...outputs.entries()].sort((a, b) => {
+      if (a[0] > b[0]) return -1;
+      if (a[0] < b[0]) return 1;
+      return 0;
+    })
+  );
+  console.log("sortedMap", sortedMap);
   let result = "";
   // iterate map
   for (const [key, value] of sortedMap) {
@@ -84,5 +93,5 @@ export function part1() {
     }
   }
 
-  console.log("result", result);
+  return parseInt(result, 2);
 }
