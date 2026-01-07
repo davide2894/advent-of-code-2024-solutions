@@ -60,9 +60,6 @@ export function part1() {
         wires.get(wire2)
       );
 
-      // TODO: something is wrong witg wires I use to calc final bits number
-      // my calculation returns 0001011111100
-      // while expected is      0011111101000
       wires.set(outputWire, outputValue);
       outputs.set(outputWire, outputValue);
       processedGates.push(gate);
