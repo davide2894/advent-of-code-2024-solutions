@@ -18,20 +18,20 @@ function calcOutput(value1, operator, value2) {
   }
 }
 
-export function solution() {
+export function part1() {
   const wires = new Map();
   const outputs = new Map();
-  knownWires.forEach((wire) =>
-    wires.set(wire.split(": ")[0], parseInt(wire.split(": ")[1]))
-  );
-  const corruptedWires = [];
-  knownWires.forEach((wire) =>
-    wires.set(wire.split(": ")[0], parseInt(wire.split(": ")[1]))
-  );
   const processedGates = [];
-  let processGates = true;
+  let shouldProcessGates = true;
 
-  while (processGates) {
+  knownWires.forEach((wire) =>
+    wires.set(wire.split(": ")[0], parseInt(wire.split(": ")[1]))
+  );
+  knownWires.forEach((wire) =>
+    wires.set(wire.split(": ")[0], parseInt(wire.split(": ")[1]))
+  );
+
+  while (shouldProcessGates) {
     for (const gate of gates) {
       // if can process gate
       // check if inputs are known
@@ -55,9 +55,8 @@ export function solution() {
       processedGates.push(gate);
     }
 
-    // if processedGates contain all gates -> break
     if (processedGates.length === gates.length) {
-      processGates = false;
+      shouldProcessGates = false;
     }
   }
 
@@ -68,47 +67,78 @@ export function solution() {
       return 0;
     })
   );
-  console.log("sortedMap", sortedMap);
-  let result = "";
 
-  // iterate map
+  let part1Output = "";
+
   for (const [key, value] of sortedMap) {
     if (key.startsWith("z")) {
-      result += value.toString();
+      part1Output += value.toString();
     }
   }
 
-  /**
-   * 1. define corrupted wires array
-   * 2. iterate over all gates
-   * 3. apply checks to see if gate is corrupted
-   * 4. if gate is corrupted, save its output wire into the array of corrupted wires
-   */
+  return parseInt(part1Output, 2);
+}
+
+export function part2() {
+  const inputAssociatedOperators = new Map();
+  const corruptedWires = [];
+
+  for (const gate of gates) {
+    const [operations] = gate.split(" -> ");
+    const [wire1, operator, wire2] = operations.split(" ");
+
+    if (!inputAssociatedOperators.has(wire1)) {
+      inputAssociatedOperators.set(wire1, [operator]);
+    }
+    if (!inputAssociatedOperators.get(wire1).includes(operator)) {
+      inputAssociatedOperators.get(wire1).push(operator);
+    }
+    if (!inputAssociatedOperators.has(wire2)) {
+      inputAssociatedOperators.set(wire2, [operator]);
+    }
+    if (!inputAssociatedOperators.get(wire2).includes(operator)) {
+      inputAssociatedOperators.get(wire2).push(operator);
+    }
+  }
 
   for (const gate of gates) {
     const [operations, outputWire] = gate.split(" -> ");
     const [wire1, operator, wire2] = operations.split(" ");
+    const isXYInput =
+      wire1.startsWith("x") ||
+      wire2.startsWith("y") ||
+      wire1.startsWith("y") ||
+      wire2.startsWith("x");
+    const isFirstBit =
+      wire1 === "x00" || wire1 === "y00" || wire2 === "x00" || wire2 === "y00";
+    const isLastBit = outputWire === "z45";
 
-    if (outputWire.startsWith("z") && operator !== "XOR") {
+    if (outputWire.startsWith("z") && !isLastBit && operator !== "XOR") {
       corruptedWires.push(outputWire);
+      continue;
     }
 
-    if (operator === "XOR") {
-      if (wire1.startsWith("x)" && wire2.startsWith("y"))) {
-        // TODO: if the output is not used as input to any other gate, mark as corrupte
-      } else {
+    if (operator === "XOR" && !outputWire.startsWith("z") && !isXYInput) {
+      corruptedWires.push(outputWire);
+      continue;
+    }
+
+    if (operator === "XOR" && isXYInput && !isFirstBit) {
+      const inputOperators = inputAssociatedOperators.get(outputWire);
+      if (!inputOperators.includes("XOR")) {
         corruptedWires.push(outputWire);
+        continue;
       }
     }
 
-    if (corruptedWires.length === 8) {
-      // exite loop
-      break;
+    if (operator === "AND" && isXYInput && !isFirstBit) {
+      const inputOperators = inputAssociatedOperators.get(outputWire);
+      if (!inputOperators.includes("OR")) {
+        corruptedWires.push(outputWire);
+        continue;
+      }
     }
   }
 
-  return JSON.stringify({
-    part1: parseInt(result, 2),
-    part2: corruptedWires.sort().join(","),
-  });
+  return corruptedWires.sort().join(",");
 }
